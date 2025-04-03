@@ -37,7 +37,7 @@ func main() {
 
 	actioninfo.Info(input, &daySteps)
 
-	// // тренировки
+	// тренировки
 	actions := []string{
 		"3456,Ходьба,3h00m",
 		"something is wrong",
