@@ -1,16 +1,38 @@
 package spentenergy
 
-import ...
+import (
+	"fmt"
+	"time"
+)
 
 // Основные константы, необходимые для расчетов.
 const (
-	lenStep   = 0.65  // средняя длина шага.
-	mInKm     = 1000  // количество метров в километре.
-	minInH    = 60    // количество минут в часе.
-	kmhInMsec = 0.278 // коэффициент для преобразования км/ч в м/с.
-	cmInM     = 100   // количество сантиметров в метре.
-	speed     = 1.39  // средняя скорость в м/с
+	lenStep = 0.65 // средняя длина шага.
+	mInKm   = 1000 // количество метров в километре.
+	minInH  = 60   // количество минут в часе.
 )
+
+// Distance возвращает дистанцию(в километрах), которую преодолел пользователь за время тренировки.
+//
+// Параметры:
+//
+// steps int — количество совершенных действий (число шагов при ходьбе и беге).
+func Distance(steps int) float64 {
+	return (float64(steps) * lenStep) / mInKm
+}
+
+// МeanSpeed возвращает значение средней скорости движения во время тренировки.
+//
+// Параметры:
+//
+// steps int — количество совершенных действий(число шагов при ходьбе и беге).
+// duration time.Duration — длительность тренировки.
+func MeanSpeed(steps int, duration time.Duration) float64 {
+	if duration <= 0 {
+		return 0
+	}
+	return Distance(steps) / duration.Hours()
+}
 
 // Константы для расчета калорий, расходуемых при ходьбе.
 const (
@@ -23,13 +45,21 @@ const (
 // Параметры:
 //
 // steps int - количество шагов.
-// weight float64 — вес пользователя.
-// height float64 — рост пользователя.
+// weight float64 — вес(кг.) пользователя.
+// height float64 — рост(м.) пользователя.
 // duration time.Duration — длительность тренировки.
-//
-// Создайте функцию ниже.
-...
-
+func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
+	if height <= 0 || weight <= 0 {
+		return 0, fmt.Errorf("height and weight must be greater than zero")
+	}
+	if duration <= 0 {
+		return 0, fmt.Errorf("duration must be greater than zero")
+	}
+	speed := MeanSpeed(steps, duration)
+	calories := ((walkingCaloriesWeightMultiplier * weight) +
+		(speed*speed/height)*walkingSpeedHeightMultiplier) * duration.Hours() * minInH
+	return calories, nil
+}
 
 // Константы для расчета калорий, расходуемых при беге.
 const (
@@ -42,32 +72,16 @@ const (
 // Параметры:
 //
 // steps int - количество шагов.
-// weight float64 — вес пользователя.
+// weight float64 — вес(кг.) пользователя.
 // duration time.Duration — длительность тренировки.
-//
-// Создайте функцию ниже.
-...
-
-
-// МeanSpeed возвращает значение средней скорости движения во время тренировки.
-//
-// Параметры:
-//
-// steps int — количество совершенных действий(число шагов при ходьбе и беге).
-// duration time.Duration — длительность тренировки.
-// 
-// Создайте функцию ниже.
-...
-
-
-// Distance возвращает дистанцию(в километрах), которую преодолел пользователь за время тренировки.
-//
-// Для расчета дистанции нужно шаги умножить на длину шага lenStep и разделить на mInKm
-// Параметры:
-//
-// steps int — количество совершенных действий (число шагов при ходьбе и беге).
-// 
-// Создайте функцию ниже
-...
-
-
+func RunningSpentCalories(steps int, weight float64, duration time.Duration) (float64, error) {
+	if weight <= 0 {
+		return 0, fmt.Errorf("weight must be greater than zero")
+	}
+	if duration <= 0 {
+		return 0, fmt.Errorf("duration must be greater than zero")
+	}
+	speed := MeanSpeed(steps, duration)
+	calories := ((runningCaloriesMeanSpeedMultiplier * speed) - runningCaloriesMeanSpeedShift) * weight
+	return calories, nil
+}
