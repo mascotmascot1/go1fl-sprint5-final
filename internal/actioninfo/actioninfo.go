@@ -21,7 +21,7 @@ type DataParser interface {
 // dp DataParser — объект, реализующий интерфейс DataParser (например, Training или DaySteps).
 func Info(dataset []string, dp DataParser) {
 	if dp == nil {
-		fmt.Println("Error: DataParser instance is nil")
+		fmt.Println("error: DataParser is nil")
 		return
 	}
 

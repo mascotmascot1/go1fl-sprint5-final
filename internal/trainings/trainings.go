@@ -37,7 +37,7 @@ func (t *Training) Parse(datastring string) (err error) {
 	}
 	t.Steps = steps
 
-	if (parts[1] != "Ходьба") && (parts[1] != "Бег") {
+	if parts[1] != "Ходьба" && parts[1] != "Бег" {
 		return fmt.Errorf("unknown activity type: expected 'Ходьба' or 'Бег', got %q", parts[1])
 	}
 	t.TrainingType = parts[1]
